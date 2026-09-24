@@ -218,15 +218,8 @@ table.small td { padding: 1.7mm 2.5mm; }
     <tr class="ens"><td colspan="3">Ensemble (SegResNet + Deconver)</td><td class="r">100.63</td><td class="r dice">64.44</td></tr>
   </table>
   <div class="callout">+0.59 Dice over the strongest baseline at 2.95&times; fewer parameters; +1.18 over SwinUNETR-V2 at 2.9&times; fewer. nnU-Net, the only baseline of comparable size, trails by 1.05.</div>
-</section>
-
-<section class="card">
-  <div class="sec-head"><div class="n">05</div><h2>Qualitative results <small>unseen validation cases</small></h2></div>
-  <div class="figure"><img src="figs/qualitative.png" style="width:100%; border-radius:3mm"></div>
-  <div class="legend"><span style="--c:#14B8A6">true positive</span><span style="--c:#F43F5E">false positive</span><span style="--c:#3B82F6">missed lesion</span><span style="--c:#FFD166">ground-truth contour</span></div>
-  <div class="cap">Four fold-0 validation cases (3 to 52 mL lesions, never seen in training) segmented by the fold-0 models of each architecture and by their SegResNet + Deconver ensemble, with the Dice of each case. In every row the ensemble scores highest, followed by Deconver, ahead of all three baselines, as in the cross-validation.</div>
   <div class="ablation">
-    <div class="eqlabel" style="margin-top:6mm">Ablation: width helps, depth and kernel size do not <span style="font-weight:500; text-transform:none; letter-spacing:0; color:var(--muted)">(Table 2 of the paper)</span></div>
+    <div class="eqlabel" style="margin-top:5mm">Ablation: width helps, depth and kernel size do not <span style="font-weight:500; text-transform:none; letter-spacing:0; color:var(--muted)">(Table 2 of the paper)</span></div>
     <table class="small">
       <tr><th>[<i>M</i><sub>&#8467;</sub>]</th><th class="r">C<sub>0</sub></th><th class="r">k</th><th class="r">Params (M)</th><th class="r">Dice (%)</th><th>Takeaway</th></tr>
       <tr><td class="mono">[1,2,2,4]</td><td class="r">32</td><td class="r">3</td><td class="r">6.46</td><td class="r">62.76</td><td>smallest variant, still beats nnU-Net and SwinUNETR-V2</td></tr>
@@ -238,6 +231,13 @@ table.small td { padding: 1.7mm 2.5mm; }
       <tr><td class="mono">[1,2,2,4,4]</td><td class="r">64</td><td class="r">3</td><td class="r">52.77</td><td class="r">63.56</td><td>fifth level: 2&times; the parameters, no gain</td></tr>
     </table>
   </div>
+</section>
+
+<section class="card">
+  <div class="sec-head"><div class="n">05</div><h2>Qualitative results <small>unseen validation cases</small></h2></div>
+  <div class="figure"><img src="figs/qualitative.png" style="width:100%; border-radius:3mm"></div>
+  <div class="legend"><span style="--c:#14B8A6">true positive</span><span style="--c:#F43F5E">false positive</span><span style="--c:#3B82F6">missed lesion</span><span style="--c:#FFD166">ground-truth contour</span></div>
+  <div class="cap">Four fold-0 validation cases (3 to 52 mL lesions, never seen in training) segmented by the fold-0 models of each architecture and by their SegResNet + Deconver ensemble, with the Dice of each case. In every row the ensemble scores highest, followed by Deconver, ahead of all three baselines, as in the cross-validation.</div>
 </section>
 
 </div>
