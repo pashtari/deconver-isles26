@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#PBS -N isles26
+#PBS -l nodes=1:ppn=4:gpus=1,mem=96gb
+#PBS -l walltime=72:00:00
+# Train one configuration on one fold (used by submit_grid.sh). Direct use:
+#   qsub -v MODEL=deconver_m1224_c64_k3,FOLD=0,REPO=$PWD,DATA_DIR=/path/to/ISLES26,VENV=/path/to/venv hpc/train.pbs
+set -euo pipefail
+: "${MODEL:?}" "${FOLD:?}" "${REPO:?}" "${DATA_DIR:?}"
+[[ -n "${VENV:-}" ]] && source "$VENV/bin/activate"
+cd "$REPO"
+python -m monai.bundle run --config_file configs/train.yaml \
+    --model "$MODEL" --fold "$FOLD" --data_dir "$DATA_DIR" --num_workers 4

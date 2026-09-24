@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Training logs, TensorBoard events and checkpoints: distributed separately
+logs/
+# Default output directory of configs/predict.yaml
+predictions/
+
+# LaTeX build files
+manuscript/*.aux
+manuscript/*.bbl
+manuscript/*.blg
+manuscript/*.fdb_latexmk
+manuscript/*.fls
+manuscript/*.log
+manuscript/*.out
+manuscript/*.synctex.gz
+
+# Private manuscript material: working notes and submission paperwork
+manuscript/notes/
+manuscript/submission/
+poster/build/cache/

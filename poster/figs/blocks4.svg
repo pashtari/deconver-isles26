@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 898.0 406.0" font-family="Inter">
+<g transform="translate(0,74.0)">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0B1F3A"/></marker></defs>
+<text x="110.0" y="326" text-anchor="middle" font-size="16" font-weight="700" fill="#0B1F3A">nnU-Net</text>
+<rect x="12" y="250" width="168" height="30" rx="4" fill="#FBE5D6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="269.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">3³ Conv, stride S</text>
+<rect x="12" y="202" width="168" height="30" rx="4" fill="#FFE9A8" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="221.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Instance Norm</text>
+<rect x="12" y="154" width="168" height="30" rx="4" fill="#F1F3F6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="173.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">LeakyReLU</text>
+<rect x="12" y="106" width="168" height="30" rx="4" fill="#FBE5D6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="125.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">3³ Conv</text>
+<rect x="12" y="58" width="168" height="30" rx="4" fill="#FFE9A8" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="77.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Instance Norm</text>
+<rect x="12" y="10" width="168" height="30" rx="4" fill="#F1F3F6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="29.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">LeakyReLU</text>
+<line x1="96.0" y1="250" x2="96.0" y2="233" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="202" x2="96.0" y2="185" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="154" x2="96.0" y2="137" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="106" x2="96.0" y2="89" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="58" x2="96.0" y2="41" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="10" x2="96.0" y2="-9" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="300" x2="96.0" y2="281" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+</g>
+<g transform="translate(226.0,0.0)">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0B1F3A"/></marker></defs>
+<text x="110.0" y="400" text-anchor="middle" font-size="16" font-weight="700" fill="#0B1F3A">SegResNet</text>
+<rect x="12" y="324" width="168" height="30" rx="4" fill="#FBE5D6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="343.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">3³ Conv, stride S</text>
+<rect x="12" y="276" width="168" height="30" rx="4" fill="#FFE9A8" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="295.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Group Norm</text>
+<rect x="12" y="228" width="168" height="30" rx="4" fill="#F1F3F6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="247.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">ReLU</text>
+<rect x="12" y="180" width="168" height="30" rx="4" fill="#FBE5D6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="199.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">3³ Conv</text>
+<rect x="12" y="132" width="168" height="30" rx="4" fill="#FFE9A8" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="151.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Group Norm</text>
+<rect x="12" y="84" width="168" height="30" rx="4" fill="#F1F3F6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="103.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">ReLU</text>
+<rect x="12" y="36" width="168" height="30" rx="4" fill="#FBE5D6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="55.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">3³ Conv</text>
+<line x1="96.0" y1="324" x2="96.0" y2="307" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="276" x2="96.0" y2="259" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="228" x2="96.0" y2="211" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="180" x2="96.0" y2="163" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="132" x2="96.0" y2="115" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="84" x2="96.0" y2="67" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="36" x2="96.0" y2="28" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<circle cx="96.0" cy="20" r="7" fill="white" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="24.5" text-anchor="middle" font-size="13" font-weight="700" fill="#0B1F3A">+</text>
+<line x1="96.0" y1="13" x2="96.0" y2="-4" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M96.0,315.0 H194 V20 H104.0" fill="none" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="374" x2="96.0" y2="355" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+</g>
+<g transform="translate(452.0,78.0)">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0B1F3A"/></marker></defs>
+<text x="110.0" y="322" text-anchor="middle" font-size="16" font-weight="700" fill="#0B1F3A">SwinUNETR-V2</text>
+<rect x="12" y="246" width="168" height="30" rx="4" fill="#FFD7D6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="265.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Patch merging, ↓2</text>
+<rect x="12" y="198" width="168" height="30" rx="4" fill="#FFE9A8" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="217.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Layer Norm</text>
+<rect x="12" y="150" width="168" height="30" rx="4" fill="#DCD3F2" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="169.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">W-MSA / SW-MSA</text>
+<rect x="12" y="84" width="168" height="30" rx="4" fill="#FFE9A8" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="103.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Layer Norm</text>
+<rect x="12" y="36" width="168" height="30" rx="4" fill="#CFE4FF" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="55.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">MLP</text>
+<line x1="96.0" y1="246" x2="96.0" y2="229" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="198" x2="96.0" y2="181" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="150" x2="96.0" y2="140.0" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<circle cx="96.0" cy="132.0" r="7" fill="white" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="136.5" text-anchor="middle" font-size="13" font-weight="700" fill="#0B1F3A">+</text>
+<line x1="96.0" y1="125.0" x2="96.0" y2="115" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M96.0,237.0 H194 V132.0 H104.0" fill="none" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="84" x2="96.0" y2="67" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="36" x2="96.0" y2="28" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<circle cx="96.0" cy="20" r="7" fill="white" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="24.5" text-anchor="middle" font-size="13" font-weight="700" fill="#0B1F3A">+</text>
+<line x1="96.0" y1="13" x2="96.0" y2="-4" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M96.0,123.0 H194 V20 H104.0" fill="none" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="296" x2="96.0" y2="277" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+</g>
+<g transform="translate(678.0,78.0)">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0B1F3A"/></marker></defs>
+<text x="110.0" y="322" text-anchor="middle" font-size="16" font-weight="700" fill="#0B1F3A">Deconver</text>
+<rect x="12" y="246" width="168" height="30" rx="4" fill="#FBE5D6" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="265.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">S³ Conv, stride S</text>
+<rect x="12" y="198" width="168" height="30" rx="4" fill="#FFE9A8" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="217.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Instance Norm</text>
+<rect x="12" y="150" width="168" height="30" rx="4" fill="#BFE8DE" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="169.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Deconv Mixer</text>
+<rect x="12" y="84" width="168" height="30" rx="4" fill="#FFE9A8" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="103.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">Instance Norm</text>
+<rect x="12" y="36" width="168" height="30" rx="4" fill="#CFE4FF" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="55.68" text-anchor="middle" font-size="13" font-weight="600" fill="#0B1F3A">MLP</text>
+<line x1="96.0" y1="246" x2="96.0" y2="229" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="198" x2="96.0" y2="181" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="150" x2="96.0" y2="140.0" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<circle cx="96.0" cy="132.0" r="7" fill="white" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="136.5" text-anchor="middle" font-size="13" font-weight="700" fill="#0B1F3A">+</text>
+<line x1="96.0" y1="125.0" x2="96.0" y2="115" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M96.0,237.0 H194 V132.0 H104.0" fill="none" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="84" x2="96.0" y2="67" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="36" x2="96.0" y2="28" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<circle cx="96.0" cy="20" r="7" fill="white" stroke="#0B1F3A" stroke-width="2"/>
+<text x="96.0" y="24.5" text-anchor="middle" font-size="13" font-weight="700" fill="#0B1F3A">+</text>
+<line x1="96.0" y1="13" x2="96.0" y2="-4" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M96.0,123.0 H194 V20 H104.0" fill="none" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="96.0" y1="296" x2="96.0" y2="277" stroke="#0B1F3A" stroke-width="2" marker-end="url(#ah)"/>
+</g>
+</svg>

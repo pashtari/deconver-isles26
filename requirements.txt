@@ -1,0 +1,13 @@
+# Tested with Python 3.12, torch 2.10.0 (CUDA 12.6) and MONAI 1.5.2.
+# If pip's default torch wheel does not match your CUDA driver, install torch first, e.g.
+#   pip install torch --index-url https://download.pytorch.org/whl/cu126
+torch>=2.4
+monai==1.5.2
+pytorch-ignite==0.5.3
+fire
+pyyaml
+nibabel
+scikit-learn
+tensorboard
+einops
+deconver @ git+https://github.com/pashtari/deconver.git@cee753ee2c09433a9b0291e8a4473f0165444aa9

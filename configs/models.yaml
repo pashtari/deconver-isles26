@@ -1,0 +1,163 @@
+# Network definitions for every configuration reported in the paper.
+# Select one with `--model <name>`; the same name is used for logs/<name>/.
+#
+#   name                      family        [M_l]            [N_l]          C0   k   params
+#   ------------------------  ------------  ---------------  -------------  ---  --  -------
+#   nnunet                    nnU-Net       [1,1,1,1,1]      [1,1,1,1]      32   -   22.75M   <- residual blocks, see docs/reproduce.md
+#   segresnet                 SegResNet     [1,2,2,4]        [1,1,1]        64   -   75.17M
+#   swinunetr                 SwinUNETR-V2  [2,2,2,2]        [1,1,1,1,1]    48   -   72.76M
+#   deconver_m1224_c64_k3     Deconver      [1,2,2,4]        [1,1,1]        64   3   25.46M   <- headline model
+#   deconver_m1224_c32_k3     Deconver      [1,2,2,4]        [1,1,1]        32   3    6.46M
+#   deconver_m11111_c32_k3    Deconver      [1,1,1,1,1]      [1,1,1,1]      32   3   10.55M
+#   deconver_m11111_c32_k5    Deconver      [1,1,1,1,1]      [1,1,1,1]      32   5   11.13M
+#   deconver_m11111_c64_k3    Deconver      [1,1,1,1,1]      [1,1,1,1]      64   3   24.23M
+#   deconver_m111111_c32_k3   Deconver      [1,1,1,1,1,1]    [1,1,1,1,1]    32   3   24.30M
+#   deconver_m12244_c64_k3    Deconver      [1,2,2,4,4]      [1,1,1,1]      64   3   52.77M
+#
+# Deconver names encode the encoder blocks per level (m), the initial width (c)
+# and the NDC kernel size (k). Every Deconver uses instance norm, depthwise NDC
+# groups (groups=-1), a source expansion ratio of 4 and one NDC iteration.
+
+models:
+
+  # ---- baselines (Table 1) ---------------------------------------------------
+
+  nnunet:
+    _target_: monai.networks.nets.DynUNet
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    kernel_size: [3, 3, 3, 3, 3]
+    strides: [1, 2, 2, 2, 2]
+    upsample_kernel_size: [2, 2, 2, 2]
+    filters: [32, 64, 128, 256, 512]
+    norm_name: instance
+    act_name: LeakyReLU
+    res_block: true    # the distributed checkpoints were trained with residual blocks;
+                       # the paper describes the plain variant (res_block: false, 22.57M)
+
+  segresnet:
+    _target_: monai.networks.nets.SegResNet
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    init_filters: 64
+    blocks_down: [1, 2, 2, 4]
+    blocks_up: [1, 1, 1]
+    norm: [GROUP, {num_groups: 8}]
+
+  swinunetr:
+    _target_: monai.networks.nets.SwinUNETR
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    feature_size: 48
+    use_v2: true
+    use_checkpoint: true
+
+  # ---- Deconver (Table 1 and Table 2) ------------------------------------------
+
+  deconver_m1224_c64_k3:
+    _target_: deconver.Deconver
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    encoder_depth: [1, 2, 2, 4]
+    encoder_width: [64, 128, 256, 512]
+    strides: [1, 2, 2, 2]
+    decoder_depth: [1, 1, 1]
+    norm: $torch.nn.InstanceNorm3d
+    act: $torch.nn.ReLU
+    groups: -1
+    ratio: 4
+    kernel_size: [3, 3, 3]
+
+  deconver_m1224_c32_k3:
+    _target_: deconver.Deconver
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    encoder_depth: [1, 2, 2, 4]
+    encoder_width: [32, 64, 128, 256]
+    strides: [1, 2, 2, 2]
+    decoder_depth: [1, 1, 1]
+    norm: $torch.nn.InstanceNorm3d
+    act: $torch.nn.ReLU
+    groups: -1
+    ratio: 4
+    kernel_size: [3, 3, 3]
+
+  deconver_m11111_c32_k3:
+    _target_: deconver.Deconver
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    encoder_depth: [1, 1, 1, 1, 1]
+    encoder_width: [32, 64, 128, 256, 512]
+    strides: [1, 2, 2, 2, 2]
+    decoder_depth: [1, 1, 1, 1]
+    norm: $torch.nn.InstanceNorm3d
+    act: $torch.nn.ReLU
+    groups: -1
+    ratio: 4
+    kernel_size: [3, 3, 3]
+
+  deconver_m11111_c32_k5:
+    _target_: deconver.Deconver
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    encoder_depth: [1, 1, 1, 1, 1]
+    encoder_width: [32, 64, 128, 256, 512]
+    strides: [1, 2, 2, 2, 2]
+    decoder_depth: [1, 1, 1, 1]
+    norm: $torch.nn.InstanceNorm3d
+    act: $torch.nn.ReLU
+    groups: -1
+    ratio: 4
+    kernel_size: [5, 5, 5]
+
+  deconver_m11111_c64_k3:
+    _target_: deconver.Deconver
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    encoder_depth: [1, 1, 1, 1, 1]
+    encoder_width: [64, 128, 256, 512, 512]
+    strides: [1, 2, 2, 2, 2]
+    decoder_depth: [1, 1, 1, 1]
+    norm: $torch.nn.InstanceNorm3d
+    act: $torch.nn.ReLU
+    groups: -1
+    ratio: 4
+    kernel_size: [3, 3, 3]
+
+  deconver_m111111_c32_k3:
+    _target_: deconver.Deconver
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    encoder_depth: [1, 1, 1, 1, 1, 1]
+    encoder_width: [32, 64, 128, 256, 512, 512]
+    strides: [1, 2, 2, 2, 2, 2]
+    decoder_depth: [1, 1, 1, 1, 1]
+    norm: $torch.nn.InstanceNorm3d
+    act: $torch.nn.ReLU
+    groups: -1
+    ratio: 4
+    kernel_size: [3, 3, 3]
+
+  deconver_m12244_c64_k3:
+    _target_: deconver.Deconver
+    spatial_dims: 3
+    in_channels: 1
+    out_channels: 1
+    encoder_depth: [1, 2, 2, 4, 4]
+    encoder_width: [64, 128, 256, 512, 512]
+    strides: [1, 2, 2, 2, 2]
+    decoder_depth: [1, 1, 1, 1]
+    norm: $torch.nn.InstanceNorm3d
+    act: $torch.nn.ReLU
+    groups: -1
+    ratio: 4
+    kernel_size: [3, 3, 3]

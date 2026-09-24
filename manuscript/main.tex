@@ -1,0 +1,189 @@
+% SWITCH+ 2026 (MICCAI) camera-ready.
+% Build: latexmk -pdf main.tex
+% Data provenance and open items are kept in PROVENANCE.md, not in this file.
+%
+\documentclass[runningheads,a4paper]{llncs}
+%
+\usepackage[T1]{fontenc}
+% T1 fonts will be used to generate the final print and online PDFs,
+% so please use T1 fonts in your manuscript whenever possible.
+%
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{subcaption}
+% Restore the LLNCS caption look that the caption package overrides:
+% bold "Fig. 1." / "Table 1." label, period separator, \small body text.
+\captionsetup{font=small,labelfont=bf,labelsep=period}
+\captionsetup[sub]{font=small,labelfont=bf,labelsep=space}
+\usepackage{url}
+\urlstyle{same}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,fit,arrows.meta}
+% A small amount of extra stretch removes the few remaining overfull hboxes
+% without visibly loosening the setting.
+\emergencystretch=1.5em
+% Tighten the space between top floats and body text (LLNCS default is generous).
+\setlength{\textfloatsep}{12pt plus 2pt minus 2pt}
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+%
+\begin{document}
+%
+\title{Deconver for Stroke Lesion Segmentation}
+%
+\titlerunning{Deconver for Stroke Lesion Segmentation}
+%
+\author{Niels Vyncke\inst{1} \and
+Shahryar Noei\inst{2} \and
+Giuseppe Jurman\inst{2} \and
+Aleksandra Pi\v{z}urica\inst{1} \and
+Pooya Ashtari\inst{1}}
+%
+\authorrunning{N. Vyncke et al.}
+%
+\institute{Department of Telecommunications and Information Processing (TELIN),
+Ghent University, B-9000 Ghent, Belgium\\
+\email{pooya.ashtari@ugent.be} (corresponding author) \and
+Data Science for Health Unit, Fondazione Bruno Kessler, Via Sommarive 18, Povo,
+38123 Trento, Italy}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+ISLES'26 poses ischemic stroke lesion segmentation on native-space T1-weighted MRI acquired at more than 60 centers and covering acute, sub-acute, and chronic lesions. We evaluate Deconver, a U-shaped network descended from Factorizer and built on a core block that replaces self-attention with a nonnegative deconvolution (NDC) operator, against nnU-Net, SegResNet, and SwinUNETR. Preprocessing, augmentation, optimization, folds, and inference are identical across models, so differences reflect architecture rather than pipeline engineering. In five-fold cross-validation on the ISLES'26 training cohort, Deconver reaches the highest mean Dice of the four, 63.6, ahead of SegResNet (63.0), nnU-Net (62.5), and SwinUNETR (62.4), at about $3\times$ fewer parameters than either large baseline; a 10.6M-parameter variant matches SegResNet at over $7\times$ fewer parameters, and a 6.5M variant still exceeds nnU-Net and SwinUNETR. Ablating encoder depth, initial width, and NDC kernel size identifies width as the dominant factor, finds no benefit from enlarging the NDC kernel beyond $3^3$, and shows diminishing returns from further scaling. Ensembling Deconver with SegResNet, our final challenge submission, raises Dice to 64.4. Code and configurations: \url{https://github.com/pashtari/deconver-isles26}.
+
+\keywords{U-Net \and Vision Transformer \and Stroke Lesion \and Image Segmentation \and Deconvolution \and Deconver}
+\end{abstract}
+%
+\section{Introduction}
+\input{architecture}
+
+Ischemic stroke is a leading cause of long-term neurological disability, and delineating infarcted tissue on MRI underpins the quantification of tissue damage and the development of imaging biomarkers of outcome. Manual annotation is slow and subject to inter-observer variability; automated segmentation reaches expert-level agreement on acute diffusion-weighted MRI~\cite{de_la_rosa_deepisles_2025}, but remains difficult because lesions vary widely in size, location, morphology, and contrast, and that variability compounds across disease stages and sites.
+
+The ISLES series has benchmarked stroke lesion segmentation since 2015; ISLES'22 provided multi-sequence acute-stage MRI with expert annotations~\cite{hernandez2022isles22}. ISLES'26~\cite{isles26} changes the problem along three axes at once: a single structural modality---\emph{T1-weighted} MRI---so the diffusion contrasts on which acute delineation usually relies are absent; a cohort spanning acute, sub-acute, and chronic lesions, whose T1-weighted appearance changes markedly with time since onset; and scans from more than 60 centers at native resolution and orientation. Generalization, rather than performance under harmonized acquisition, is the operative difficulty.
+
+Most segmentation networks proposed since U-Net~\cite{ronneberger2015unet} keep its encoder--decoder topology with skip connections and differ mainly in the block applied at each resolution level (Fig.~\ref{fig:architectures}). We study \emph{Deconver}~\cite{ashtari2025deconver}, which keeps the transformer-style block layout but replaces self-attention with a Deconv Mixer built around a nonnegative deconvolution (NDC) layer. Deconver descends from Factorizer~\cite{ashtari2023factorizer}, which first showed that a nonnegative matrix factorization layer can stand in for self-attention in a U-shaped segmentation network and, as team SWAN, ranked third in ISLES'22~\cite{de_la_rosa_deepisles_2025}. Deconver keeps that nonnegativity prior but recasts the context operator as a deconvolution, capturing spatial dependencies while restoring high-frequency detail far more cheaply than attention. Our baselines span the dominant alternatives: nnU-Net~\cite{isensee2021nnunet} (plain convolutions), SegResNet~\cite{myronenko2018segresnet} (residual convolutions), and SwinUNETR~\cite{hatamizadeh2022swinunetr} (a hierarchical Swin Transformer~\cite{liu2021swin} encoder whose shifted-window self-attention reaches beyond a convolution's local receptive field, at higher cost).
+
+Published comparisons are hard to interpret: each method comes with its own preprocessing, augmentation, and optimization recipe, and often a different model size, so differences attributed to the block confound it with pipeline engineering and capacity. We therefore evaluate all four families under one fixed pipeline. Our contributions are threefold. (i) We report the first evaluation of Deconver on ISLES'26, in a \emph{controlled} setting that isolates the effect of the core block. (ii) Of the four models compared, Deconver attains the best mean Dice using about a third of the parameters of the strongest baselines, and a 6.46M-parameter variant already outperforms nnU-Net and SwinUNETR. (iii) An ablation over encoder blocks, initial width, and NDC kernel size shows that width dominates, that a $3^3$ deconvolution kernel suffices, and that returns from further scaling are small; ensembling Deconver with SegResNet, which errs differently, adds a further 0.85 Dice points and forms our challenge submission.
+
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Data}
+
+We use the ISLES'26 training cohort~\cite{isles26}: native-space T1-weighted MRI with binary expert annotations of ischemic infarct, acquired at more than 60 centers and released without resampling or spatial normalization, so voxel spacing, field of view, and orientation vary. Lesions span the acute, sub-acute, and chronic stages.
+
+\subsection{Architectures and Configurations}
+
+All four networks instantiate the encoder--decoder template of Fig.~\ref{fig:backbone}: an $L$-level encoder in which each stage halves the resolution and doubles the channel count, a symmetric decoder that upsamples with transposed convolutions, and skip connections concatenating encoder features into the decoder. Level $\ell$ carries $C_\ell$ channels and contains $M_\ell$ encoder and $N_\ell$ decoder blocks, with $C_0$ the initial width; Deconver caps its width at 512, so $C_\ell = \min(2^\ell C_0, 512)$. The families differ in the block repeated at each level (Fig.~\ref{fig:blocks}).
+
+Two deviations deserve emphasis. We adopt the nnU-Net \emph{network topology} but not its self-configuring pipeline, so its row in Table~\ref{tab:main} characterizes the plain convolutional block rather than the framework, whose principal strength is the automated configuration we hold fixed. We use SwinUNETR-V2~\cite{he2023swinunetrv2}, which prepends a residual convolutional block to each Swin stage; its depth is fixed by the Swin hierarchy, so we report feature size as $C_0$ and count only Swin blocks in $[M_\ell]$.
+
+Each family keeps its customary normalization---instance for nnU-Net and Deconver, group with eight groups for SegResNet, and layer normalization in SwinUNETR-V2's transformer blocks---and each baseline is reported at one representative configuration (Table~\ref{tab:main}). For Deconver we additionally sweep the encoder blocks per level $[M_\ell]$, the initial width $C_0$, and the NDC kernel size $k$ (Table~\ref{tab:ablation}). Decoder depth is $N_\ell{=}1$ at every level and all convolutional kernels are $3^3$ unless stated otherwise.
+
+\subsection{Deconver}
+\label{sec:deconver}
+
+A Deconver block~\cite{ashtari2025deconver} keeps the two-sub-module layout of a vision-transformer block but substitutes a Deconv Mixer for self-attention and instance normalization (IN) for layer normalization, which suits small 3D batch sizes:
+\begin{equation}
+\label{eq:block}
+\mathcal{Z} = \mathrm{DeconvMixer}(\mathrm{IN}(\mathcal{X})) + \mathcal{X},
+\qquad
+\mathcal{Y} = \mathrm{MLP}(\mathrm{IN}(\mathcal{Z})) + \mathcal{Z},
+\end{equation}
+where the MLP is two pointwise convolutions separated by a GELU. The mixer projects, enforces nonnegativity, applies the NDC layer, and projects back:
+\begin{equation}
+\label{eq:mixer}
+\mathrm{DeconvMixer}(\mathcal{X}) = \mathrm{PWConv}\bigl(\mathrm{NDC}(\mathrm{ReLU}(\mathrm{PWConv}(\mathcal{X})))\bigr).
+\end{equation}
+The NDC layer treats its nonnegative input $\mathcal{X}$ as a blurred observation and recovers a latent source by minimizing $\|\mathcal{X}-\mathcal{S}\ast\mathcal{V}\|_\mathrm{F}^2$ over $\mathcal{S}\ge0$, with $\mathcal{V}\ge0$ a learnable filter and $\ast$ multi-channel cross-correlation with a $k^3$ kernel. From a learned nonnegative initialization $\mathcal{S}^{(0)}$, one multiplicative Richardson--Lucy step gives
+\begin{equation}
+\label{eq:ndc}
+\mathcal{S}^{(1)} = \mathcal{S}^{(0)} \odot
+\frac{\mathcal{X}\ast\mathcal{V}^{-}+\epsilon}
+     {\bigl(\mathcal{S}^{(0)}\ast\mathcal{V}\bigr)\ast\mathcal{V}^{-}+\epsilon},
+\end{equation}
+with $\odot$ the elementwise product, $\mathcal{V}^{-}$ the adjoint (transposed and spatially flipped) filter, and $\epsilon{=}10^{-8}$. The update provably does not increase the reconstruction error, preserves nonnegativity, and is differentiable, so $\mathcal{V}$---shared with $\mathcal{V}^{-}$---is trained end to end. It runs over $G$ channel groups and expands the source by a ratio $R$; we use depthwise groups, $R{=}4$, and one iteration throughout.
+
+\subsection{Preprocessing and Data Augmentation}
+
+All images were processed with a common pipeline implemented in MONAI~\cite{cardoso2022monai}: cropping to the intensity-based foreground bounding box with a 10-voxel margin, reorientation to RAS, and resampling to an isotropic spacing of $1\times1\times1\,\mathrm{mm}^3$ (linear interpolation for images, nearest-neighbor for masks). Intensities were normalized per channel using the mean and standard deviation of the non-zero voxels, and volumes smaller than the network input were zero-padded.
+
+During training, $128\times128\times128$ voxel patches were sampled from the preprocessed volumes. Each augmentation was applied independently with probability $0.2$: random affine transformations (rotations up to $0.26$\,rad, ${\approx}15^\circ$, about each axis; isotropic scaling within $\pm20\%$), Gaussian noise ($\sigma{=}0.1$), Gaussian smoothing ($\sigma\in[0.5,1.0]$), intensity scaling from $[0.7,1.3]$, and intensity shifts up to $0.1$; random flips along each axis used probability $0.5$. Validation used no augmentation.
+
+\subsection{Training and Evaluation}
+
+All models were trained for 300 epochs with a batch size of two, optimized with AdamW~\cite{loshchilov2019decoupled} at an initial learning rate of $1\times10^{-4}$ and a weight decay of $1\times10^{-5}$, under a warm-up cosine schedule (linear increase over three epochs, then cosine annealing). The objective summed a soft Dice loss~\cite{milletari2016vnet} and cross-entropy, and was held fixed across all architectures and configurations.
+
+We used five-fold cross-validation with folds stratified by lesion volume at the subject level. The same fold assignment was used for every architecture and configuration, so all comparisons are paired across identical data splits. Predictions were obtained by sliding-window inference with $128\times128\times128$ windows, and we report the mean Dice coefficient over the validation cases of all five folds.
+
+Our final challenge submission ensembles the two strongest architectures, averaging the softmax maps of SegResNet and Deconver voxelwise before the argmax. As every model is trained per fold, the deployed ensemble holds ten networks (five folds $\times$ two architectures); the cross-validated Dice in Table~\ref{tab:main} averages, per validation case, only the two networks whose fold excluded it.
+
+\section{Results and Discussion}
+\label{sec:results}
+
+\begin{table}[t]
+\centering
+\caption{Five-fold cross-validation on ISLES'26; notation as in Sect.~\ref{sec:methods}. nnU-Net and SegResNet Dice average two runs. Best Dice in bold, second best underlined.}
+\label{tab:main}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{0.95}
+\begin{tabular}{@{}lccc rc@{}}
+\toprule
+Model & $[M_\ell]$ & $[N_\ell]$ & $C_0$ & Params (M) & Dice (\%) $\uparrow$ \\
+\midrule
+nnU-Net      & $[1,1,1,1,1]$ & $[1,1,1,1]$   & 32 & \phantom{0}22.57 & 62.54 \\
+SegResNet    & $[1,2,2,4]$   & $[1,1,1]$     & 64 & \phantom{0}75.17 & 63.00 \\
+SwinUNETR-V2 & $[2,2,2,2]$   & $[1,1,1,1,1]$ & 48 & \phantom{0}72.76 & 62.41 \\
+Deconver     & $[1,2,2,4]$   & $[1,1,1]$     & 64 & \phantom{0}25.46 & \underline{63.59} \\
+\midrule
+\multicolumn{4}{@{}l}{Ensemble (SegResNet\,+\,Deconver)} & 100.63 & \textbf{64.44} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Deconver ablation on ISLES'26, ordered by parameter count. Best Dice in bold, second best underlined.}
+\label{tab:ablation}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{0.95}
+\begin{tabular}{@{}cccc rc@{}}
+\toprule
+$[M_\ell]$ & $[N_\ell]$ & $C_0$ & $k$ & Params (M) & Dice (\%) $\uparrow$ \\
+\midrule
+$[1,2,2,4]$     & $[1,1,1]$     & 32 & 3 & \phantom{0}6.46 & 62.76 \\
+$[1,1,1,1,1]$   & $[1,1,1,1]$   & 32 & 3 & 10.55 & 62.99 \\
+$[1,1,1,1,1]$   & $[1,1,1,1]$   & 32 & 5 & 11.13 & 62.85 \\
+$[1,1,1,1,1]$   & $[1,1,1,1]$   & 64 & 3 & 24.23 & 63.40 \\
+$[1,1,1,1,1,1]$ & $[1,1,1,1,1]$ & 32 & 3 & 24.30 & 62.91 \\
+$[1,2,2,4]$     & $[1,1,1]$     & 64 & 3 & 25.46 & \textbf{63.59} \\
+$[1,2,2,4,4]$   & $[1,1,1,1]$   & 64 & 3 & 52.77 & \underline{63.56} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Comparison with the baselines.} Deconver attains the highest mean Dice of the four single models in Table~\ref{tab:main}, $63.59$, ahead of SegResNet ($63.00$), nnU-Net ($62.54$), and SwinUNETR-V2 ($62.41$). The $0.59$-point margin over the strongest baseline comes at $2.95\times$ fewer parameters ($25.46$M against $75.17$M); against SwinUNETR-V2 the gap widens to $1.18$ points, again at $2.9\times$ fewer. Only nnU-Net is comparable in size ($22.57$M), and it trails by $1.05$ points. Accuracy and capacity are thus not aligned: the largest model is not the most accurate, nor the smallest the least accurate. Substituting nonnegative deconvolution for residual convolution or shifted-window attention saves parameters outright; the accuracy margin is smaller, and the SegResNet comparison is not normalization-matched.
+
+\noindent\textbf{Ablation.} \emph{Width} is by far the most effective knob in Table~\ref{tab:ablation}: doubling $C_0$ from 32 to 64 raises Dice by $0.83$ at $[M_\ell]{=}[1,2,2,4]$ ($62.76\!\rightarrow\!63.59$) and by $0.41$ at $[1,1,1,1,1]$ ($62.99\!\rightarrow\!63.40$). \emph{Depth} is not: a sixth level at $C_0{=}32$ costs $2.3\times$ the parameters for $-0.08$ Dice, and a fifth level at $C_0{=}64$ doubles them for $-0.03$ Dice. \emph{Enlarging the NDC kernel does not help}: $k{=}5$ loses $0.14$ Dice against $k{=}3$ while adding parameters, so a $3^3$ deconvolution already spans the useful support. The three $C_0{=}64$ rows, spanning $24.23$--$52.77$M, differ by only $0.19$ Dice, so we report the $25.46$M model rather than the largest.
+
+\noindent\textbf{Efficiency.} The compact variants are more striking still: $10.55$M matches SegResNet ($62.99$ against $63.00$) at $7.1\times$ fewer parameters, and $6.46$M still beats nnU-Net and SwinUNETR-V2 at $3.5\times$ and $11.3\times$ fewer; every row of Table~\ref{tab:ablation} outperforms both.
+
+\noindent\textbf{Ensemble.} Averaging the Deconver and SegResNet probability maps reaches $64.44$ Dice, $0.85$ points above the better of the two and most of the $1.18$-point spread between the best and worst single models. No scaling bought as much: all of Table~\ref{tab:ablation} spans $0.83$ points across an eightfold parameter range. The two blocks evidently err partly independently---something an ensemble exploits and a larger network cannot.
+
+\section{Conclusion}
+
+Under one fixed pipeline on ISLES'26, Deconver gives the best mean Dice of the four models compared ($63.59$ against $63.00$, $62.54$, $62.41$) on roughly a third of the parameters of the two large baselines; a $10.55$M variant already matches SegResNet. The ablation locates the gain in width rather than depth or kernel size, with small returns from further scaling, and combining the two best blocks pays more than enlarging either---the Deconver--SegResNet ensemble ($64.44$ Dice) is our challenge submission. Lesion-wise metrics, per-fold tests, and center-held-out splits come next.
+
+\begin{credits}
+\subsubsection{\discintname}
+The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
+
+% ---- Bibliography ----
+\bibliographystyle{splncs04}
+\bibliography{bib}
+%
+\end{document}

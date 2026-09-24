@@ -1,0 +1,76 @@
+{
+    "schema": "https://github.com/Project-MONAI/MONAI-extra-test-data/releases/download/0.8.1/meta_schema_20220324.json",
+    "version": "1.0.0",
+    "changelog": {
+        "1.0.0": "Release accompanying 'Deconver for Stroke Lesion Segmentation' (SWITCH+ 2026, MICCAI)"
+    },
+    "monai_version": "1.5.2",
+    "pytorch_version": "2.10.0",
+    "numpy_version": "1.26.4",
+    "required_packages_version": {
+        "deconver": "0.0.2",
+        "nibabel": "5.4.2",
+        "pytorch-ignite": "0.5.3",
+        "scikit-learn": "1.8.0",
+        "tensorboard": "2.20.0"
+    },
+    "name": "Deconver for stroke lesion segmentation (ISLES'26)",
+    "task": "Ischemic stroke lesion segmentation on native-space T1-weighted MRI",
+    "description": "3D segmentation of ischemic stroke lesions from T1-weighted MRI (ISLES'26 training cohort) with Deconver, nnU-Net, SegResNet and SwinUNETR-V2 trained under one fixed pipeline.",
+    "authors": "Niels Vyncke, Shahryar Noei, Giuseppe Jurman, Aleksandra Pizurica, Pooya Ashtari",
+    "copyright": "Copyright (c) 2026 Ghent University and Fondazione Bruno Kessler",
+    "data_source": "https://doi.org/10.5281/zenodo.19856506",
+    "data_type": "NIfTI",
+    "image_classes": "single-channel T1-weighted MRI, resampled to 1x1x1 mm and z-scored over non-zero voxels",
+    "label_classes": {
+        "description": "single-channel binary mask",
+        "channels": {
+            "0": "ischemic stroke lesion"
+        }
+    },
+    "pred_classes": {
+        "description": "single-channel binary mask",
+        "channels": {
+            "0": "ischemic stroke lesion"
+        }
+    },
+    "eval_metrics": {
+        "val_mean_dice": 0.6359
+    },
+    "intended_use": "Research use only; not approved for clinical or diagnostic use.",
+    "references": [
+        "Vyncke et al., Deconver for Stroke Lesion Segmentation, SWITCH+ 2026 (MICCAI)",
+        "Ashtari et al., Deconver: A Deconvolutional Network for Medical Image Segmentation, IEEE JBHI 2025"
+    ],
+    "network_data_format": {
+        "inputs": {
+            "image": {
+                "type": "image",
+                "format": "magnitude",
+                "modality": "MRI",
+                "num_channels": 1,
+                "spatial_shape": ["16*n", "16*n", "16*n"],
+                "dtype": "float32",
+                "value_range": [],
+                "is_patch_data": true,
+                "channel_def": {
+                    "0": "T1w"
+                }
+            }
+        },
+        "outputs": {
+            "pred": {
+                "type": "image",
+                "format": "segmentation",
+                "num_channels": 1,
+                "spatial_shape": ["16*n", "16*n", "16*n"],
+                "dtype": "float32",
+                "value_range": [0, 1],
+                "is_patch_data": true,
+                "channel_def": {
+                    "0": "ischemic stroke lesion"
+                }
+            }
+        }
+    }
+}

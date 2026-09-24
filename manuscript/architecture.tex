@@ -1,0 +1,270 @@
+% ---------------------------------------------------------------------------
+% Figure 1: (a) shared encoder--decoder backbone, (b) computational blocks.
+% Implemented as two subfigures sharing one set of TikZ styles.
+% Visual style follows the Deconver manuscript (Figs. 1 and 2): sharp-cornered
+% boxes with thick black outlines, bold sans-serif labels, pastel fills,
+% peach stage panels, dashed repetition boxes, and a grey legend panel.
+% ---------------------------------------------------------------------------
+
+% --- Deconver figure palette ---
+\definecolor{dcPanel}{HTML}{F9D2B8}    % encoder / decoder panel background
+\definecolor{dcPanelTxt}{HTML}{843C0C} % panel title
+\definecolor{dcLegend}{HTML}{DFDFDF}   % legend panel background
+\definecolor{dcDash}{HTML}{172C51}     % dashed repetition box
+\definecolor{dcBlock}{HTML}{A8D7FF}    % main computational block
+\definecolor{dcStem}{HTML}{C5E0B4}     % stem
+\definecolor{dcHead}{HTML}{D7ACD6}     % head
+\definecolor{dcDown}{HTML}{FFD7D6}     % downsample
+\definecolor{dcUp}{HTML}{76D5D6}       % upsample
+\definecolor{dcCat}{HTML}{D9D9D9}      % concatenate
+\definecolor{dcConv}{HTML}{FBE5D6}     % convolution
+\definecolor{dcNorm}{HTML}{FFE699}     % normalization
+\definecolor{dcAct}{HTML}{F2F2F2}      % activation
+\definecolor{dcMix}{HTML}{B2DDCA}      % token / feature mixer
+\definecolor{dcMLP}{HTML}{BFE4FF}      % MLP
+
+% --- styles shared by both subfigures --------------------------------------
+\tikzset{
+    % picture-level defaults; apply with \begin{tikzpicture}[dcbase]
+    dcbase/.style={x=1cm, y=1cm, font=\sffamily,
+                   >={Latex[length=1.3mm,width=1.2mm]}},
+    % --- boxes -------------------------------------------------------------
+    box/.style={draw=black, line width=0.7pt, rectangle, inner sep=1pt,
+                minimum width=2.5cm, minimum height=0.4cm, align=center,
+                text=black, font=\scriptsize\bfseries\sffamily},
+    badge/.style={draw=black, line width=0.7pt, rectangle, inner sep=1pt,
+                  minimum width=0.70cm, minimum height=0.30cm, fill=dcUp,
+                  text=black, font=\tiny\bfseries\sffamily},
+    bbox/.style={box, minimum width=2.15cm, minimum height=0.30cm,
+                 font=\tiny\bfseries\sffamily},
+    cbox/.style={bbox, densely dashed},   % present only if the shape changes
+    swatch/.style={box, minimum width=1.15cm, minimum height=0.36cm,
+                   font=\tiny\bfseries\sffamily},
+    % --- circles (elementwise sum) -----------------------------------------
+    sum/.style={draw=black, line width=0.7pt, circle, inner sep=0pt,
+                minimum size=0.32cm, fill=white,
+                path picture={%
+                  \draw[line width=0.55pt]
+                    (path picture bounding box.west) -- (path picture bounding box.east)
+                    (path picture bounding box.south) -- (path picture bounding box.north);}},
+    % --- connections --------------------------------------------------------
+    flow/.style={->, line width=0.7pt, draw=black},
+    % --- text ---------------------------------------------------------------
+    stitle/.style={font=\small\bfseries\sffamily, text=black},
+    iotxt/.style={font=\scriptsize\bfseries\sffamily, text=black},
+    ptxt/.style={font=\scriptsize\bfseries\sffamily, text=dcPanelTxt},
+    dims/.style={font=\tiny, text=black, inner sep=1pt, align=center},
+    lgd/.style={font=\tiny\sffamily, text=black, inner sep=1pt}
+}
+
+\begin{figure}[!t]
+\centering
+
+% =========================================================================
+% (a) Shared encoder--decoder backbone
+% =========================================================================
+\begin{subfigure}[b]{\textwidth}
+\centering
+\scalebox{0.88}{%
+\begin{tikzpicture}[dcbase]
+
+% --- stage panels and legend panel (drawn first, i.e. behind everything) ---
+\fill[dcPanel, rounded corners=6pt] (1.20, 1.45) rectangle (4.30, 6.55);
+\fill[dcPanel, rounded corners=6pt] (6.20, 1.45) rectangle (9.30, 6.55);
+\fill[dcLegend]                     (9.45, 1.92) rectangle (12.05, 4.36);
+
+\node[ptxt] at (2.75, 6.27) {Encoder};
+\node[ptxt] at (7.75, 6.27) {Decoder};
+
+% --- dashed repetition boxes (one stage) ----------------------------------
+\draw[dcDash, densely dashed, line width=0.6pt, rounded corners=3pt]
+      (1.38, 3.13) rectangle (4.12, 4.07);
+\draw[dcDash, densely dashed, line width=0.6pt, rounded corners=3pt]
+      (6.38, 2.28) rectangle (9.12, 4.07);
+\node[dims, anchor=east] at (4.12, 4.25) {$\times (L-2)$};
+\node[dims, anchor=east] at (9.12, 4.25) {$\times (L-2)$};
+
+% --- encoder: only the first block of a stage is strided -------------------
+\node[box, fill=dcStem]  (stem) at (2.75, 5.80) {Stem};
+\node[box, fill=dcBlock] (eb0)  at (2.75, 5.40) {Block $\times M_{0}$};
+
+\node[box, fill=dcBlock] (eb1a) at (2.75, 3.80) {Block, $\downarrow 2$};
+\node[box, fill=dcBlock] (eb1b) at (2.75, 3.40) {Block $\times (M_{\ell}\!-\!1)$};
+
+\node[box, fill=dcBlock] (eb2a) at (2.75, 2.20) {Block, $\downarrow 2$};
+\node[box, fill=dcBlock] (eb2b) at (2.75, 1.80) {Block $\times (M_{L-1}\!-\!1)$};
+
+% --- decoder: resampling is a separate layer on the transition -------------
+\node[box, fill=dcBlock] (db0)  at (7.75, 5.80) {Block $\times N_{0}$};
+\node[box, fill=dcCat]   (cat0) at (7.75, 5.40) {Concatenate};
+
+\node[box, fill=dcBlock] (db1)  at (7.75, 3.80) {Block $\times N_{\ell}$};
+\node[box, fill=dcCat]   (cat1) at (7.75, 3.40) {Concatenate};
+
+\node[badge] (up0) at (7.75, 4.95) {$\uparrow 2$};
+\node[badge] (up1) at (7.75, 2.95) {$\uparrow 2$};
+
+% --- head, input and output -----------------------------------------------
+\node[box, fill=dcHead, minimum width=1.35cm] (head) at (10.20, 5.80) {Head};
+\node[iotxt] at (0.60, 5.80)  {Input};
+\node[iotxt] at (11.70, 5.80) {Output};
+
+\draw[flow] (1.05, 5.80) -- (1.50, 5.80);
+\draw[flow] (db0.east)  -- (head.west);
+\draw[flow] (head.east) -- (11.30, 5.80);
+
+% --- vertical flow --------------------------------------------------------
+\draw[flow] (2.75, 5.20) -- (2.75, 4.00);
+\draw[flow] (2.75, 3.20) -- (2.75, 2.40);
+\draw[flow] (7.75, 4.00) -- (up0.south);
+\draw[flow] (up0.north)  -- (7.75, 5.20);
+
+% --- skip connections and feature-map sizes -------------------------------
+\draw[flow] (eb0.east)  -- (cat0.west);
+\draw[flow] (eb1b.east) -- (cat1.west);
+\draw[flow] (eb2b.east) -- (7.75, 1.80) -- (up1.south);
+\draw[flow] (up1.north) -- (7.75, 3.20);
+
+\node[dims] at (5.25, 5.67) {$C_{0}\!\times\!128^{3}$};
+\node[dims] at (5.25, 3.66)
+      {$C_{\ell}\!\times\!\left(\frac{128}{2^{\ell}}\right)^{\!3}$};
+\node[dims] at (5.25, 2.12)
+      {$C_{L-1}\!\times\!\left(\frac{128}{2^{L-1}}\right)^{\!3}$};
+
+% --- legend ---------------------------------------------------------------
+\node[swatch, fill=dcStem,  minimum width=0.95cm] at (9.95, 4.12) {Stem};
+\node[swatch, fill=dcBlock, minimum width=0.95cm] at (9.95, 3.68) {Block};
+\node[swatch, fill=dcHead,  minimum width=0.95cm] at (9.95, 3.24) {Head};
+\node[swatch, fill=dcUp,    minimum width=0.95cm] at (9.95, 2.80) {$\uparrow 2$};
+
+\node[lgd, anchor=west] at (10.52, 4.12) {$3^3$ Conv};
+\node[lgd, anchor=west] at (10.52, 3.68) {defined in (b)};
+\node[lgd, anchor=west] at (10.52, 3.24) {$1^3$ Conv};
+\node[lgd, anchor=west] at (10.52, 2.80) {$2^3$ transp. conv};
+
+\node[lgd, anchor=west] at (9.55, 2.42) {$\downarrow 2$ (inside the block):};
+\node[lgd, anchor=west] at (9.55, 2.10) {$/2$ resolution, $\times 2$ channels};
+
+\end{tikzpicture}}
+\caption{Shared $L$-level encoder--decoder backbone. Level $\ell$ carries $C_\ell$
+channels and contains $M_\ell$ encoder and $N_\ell$ decoder blocks.}
+\label{fig:backbone}
+\end{subfigure}
+
+\vspace{0.35em}
+
+% =========================================================================
+% (b) Computational blocks
+% =========================================================================
+\begin{subfigure}[b]{\textwidth}
+\centering
+\scalebox{0.88}{%
+\begin{tikzpicture}[dcbase]
+
+\node[stitle] at (1.35, 0.55) {nnU-Net};
+\node[stitle] at (4.50, 0.55) {SegResNet};
+\node[stitle] at (7.65, 0.55) {SwinUNETR};
+\node[stitle] at (10.80, 0.55) {Deconver};
+
+% -------------------------------------------------------------------------
+% nnU-Net block (data flows upwards)
+% -------------------------------------------------------------------------
+\node[bbox, fill=dcConv] (uc1) at (1.35, -3.850) {$3^3$ Conv, stride $S$};
+\node[bbox, fill=dcNorm] (un1) at (1.35, -3.250) {InstanceNorm};
+\node[bbox, fill=dcAct]  (ua1) at (1.35, -2.650) {LeakyReLU};
+\node[bbox, fill=dcConv] (uc2) at (1.35, -2.050) {$3^3$ Conv};
+\node[bbox, fill=dcNorm] (un2) at (1.35, -1.450) {InstanceNorm};
+\node[bbox, fill=dcAct]  (ua2) at (1.35, -0.850) {LeakyReLU};
+
+\draw[flow] (1.35, -4.35) -- (uc1.south);
+\draw[flow] (uc1.north) -- (un1.south);
+\draw[flow] (un1.north) -- (ua1.south);
+\draw[flow] (ua1.north) -- (uc2.south);
+\draw[flow] (uc2.north) -- (un2.south);
+\draw[flow] (un2.north) -- (ua2.south);
+\draw[flow] (ua2.north) -- (1.35, -0.35);
+
+% -------------------------------------------------------------------------
+% SegResNet block
+% -------------------------------------------------------------------------
+\node[cbox, fill=dcConv] (sc0) at (4.50, -3.850) {$3^3$ Conv, stride $S$};
+\node[bbox, fill=dcNorm] (sn1) at (4.50, -3.300) {GroupNorm};
+\node[bbox, fill=dcAct]  (sa1) at (4.50, -2.750) {ReLU};
+\node[bbox, fill=dcConv] (sc1) at (4.50, -2.200) {$3^3$ Conv};
+\node[bbox, fill=dcNorm] (sn2) at (4.50, -1.650) {GroupNorm};
+\node[bbox, fill=dcAct]  (sa2) at (4.50, -1.100) {ReLU};
+\node[bbox, fill=dcConv] (sc2) at (4.50, -0.550) {$3^3$ Conv};
+\node[sum]               (ss)  at (4.50, -0.000) {};
+
+\draw[flow] (4.50, -4.30) -- (sc0.south);
+\draw[flow] (sc0.north) -- (sn1.south);
+\draw[flow] (sn1.north) -- (sa1.south);
+\draw[flow] (sa1.north) -- (sc1.south);
+\draw[flow] (sc1.north) -- (sn2.south);
+\draw[flow] (sn2.north) -- (sa2.south);
+\draw[flow] (sa2.north) -- (sc2.south);
+\draw[flow] (sc2.north) -- (ss.south);
+\draw[flow] (ss.north)  -- (4.50, 0.4);
+\draw[flow] (4.50, -3.607) -- (5.72, -3.607) -- (5.72, -0.000) -- (ss.east);
+
+% -------------------------------------------------------------------------
+% SwinUNETR block (Swin Transformer block; downsampling by patch merging)
+% -------------------------------------------------------------------------
+\node[cbox, fill=dcConv] (wc0) at (7.65, -3.850) {Patch merging, $\downarrow 2$};
+\node[bbox, fill=dcNorm] (wn1) at (7.65, -3.283) {LayerNorm};
+\node[bbox, fill=dcMix]  (wm)  at (7.65, -2.717) {W-MSA / SW-MSA};
+\node[sum]               (ws1) at (7.65, -2.150) {};
+\node[bbox, fill=dcNorm] (wn2) at (7.65, -1.583) {LayerNorm};
+\node[bbox, fill=dcMLP]  (wp)  at (7.65, -1.017) {MLP};
+\node[sum]               (ws2) at (7.65, -0.450) {};
+
+\draw[flow] (7.65, -4.35) -- (wc0.south);
+\draw[flow] (wc0.north) -- (wn1.south);
+\draw[flow] (wn1.north) -- (wm.south);
+\draw[flow] (wm.north)  -- (ws1.south);
+\draw[flow] (ws1.north) -- (wn2.south);
+\draw[flow] (wn2.north) -- (wp.south);
+\draw[flow] (wp.north)  -- (ws2.south);
+\draw[flow] (ws2.north) -- (7.65, -0.00);
+\draw[flow] (7.65, -3.567) -- (8.87, -3.567) -- (8.87, -2.150) -- (ws1.east);
+\draw[flow] (7.65, -1.867) -- (8.87, -1.867) -- (8.87, -0.450) -- (ws2.east);
+
+% -------------------------------------------------------------------------
+% Deconver block
+% -------------------------------------------------------------------------
+\node[cbox, fill=dcConv] (vc0) at (10.80, -3.850) {$S^3$ Conv, stride $S$};
+\node[bbox, fill=dcNorm] (vn1) at (10.80, -3.283) {InstanceNorm};
+\node[bbox, fill=dcMix]  (vm)  at (10.80, -2.717) {Deconv Mixer};
+\node[sum]               (vs1) at (10.80, -2.150) {};
+\node[bbox, fill=dcNorm] (vn2) at (10.80, -1.583) {InstanceNorm};
+\node[bbox, fill=dcMLP]  (vp)  at (10.80, -1.017) {MLP};
+\node[sum]               (vs2) at (10.80, -0.450) {};
+
+\draw[flow] (10.80, -4.35) -- (vc0.south);
+\draw[flow] (vc0.north) -- (vn1.south);
+\draw[flow] (vn1.north) -- (vm.south);
+\draw[flow] (vm.north)  -- (vs1.south);
+\draw[flow] (vs1.north) -- (vn2.south);
+\draw[flow] (vn2.north) -- (vp.south);
+\draw[flow] (vp.north)  -- (vs2.south);
+\draw[flow] (vs2.north) -- (10.80, -0.000);
+\draw[flow] (10.80, -3.567) -- (12.02, -3.567) -- (12.02, -2.150) -- (vs1.east);
+\draw[flow] (10.80, -1.867) -- (12.02, -1.867) -- (12.02, -0.450) -- (vs2.east);
+
+\node[dims] at (6.10, -4.52)
+      {$S=2$ in the first block of a stage and $S=1$ otherwise;\\
+       dashed layers are instantiated only when the block changes shape};
+
+\end{tikzpicture}}
+\caption{Computational block of each architecture, with data flowing upwards.}
+\label{fig:blocks}
+\end{subfigure}
+
+\caption{Evaluated architectures. Downsampling ($\downarrow 2$: half the
+resolution, twice the channels) happens \emph{inside} the first block of each
+encoder stage, whereas upsampling ($\uparrow 2$) is a separate transposed
+convolution on the decoder transition. SwinUNETR instead downsamples by patch
+merging outside the block and uses convolutional decoder blocks.}
+\label{fig:architectures}
+
+\end{figure}

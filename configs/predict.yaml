@@ -1,0 +1,120 @@
+# Segment new T1-weighted images with an ensemble of trained models.
+#
+#   python -m monai.bundle run --config_file "['configs/train.yaml','configs/predict.yaml']" \
+#       --input_dir /path/to/images --pred_dir predictions
+#
+# Every file matching input_pattern under input_dir is segmented by the given
+# models and folds (checkpoints from logs/<model>/fold<fold>/); sigmoid
+# probabilities are averaged, thresholded at 0.5 and written to pred_dir as
+# binary NIfTI masks in the original image space.
+#
+# The challenge submission (5 folds x SegResNet + Deconver) corresponds to
+#   --models "['segresnet','deconver_m1224_c64_k3']" --folds "[0,1,2,3,4]"
+
+imports:
+  - $import os
+  - $import glob
+  - $import scripts
+
+input_dir: images
+input_pattern: "**/*_T1w.nii.gz"
+pred_dir: predictions
+models: [deconver_m1224_c64_k3]
+folds: [0, 1, 2, 3, 4]
+
+members: $[(m, f) for m in @models for f in @folds]
+ckpt_paths: $[scripts.find_checkpoint(os.path.join(@logs_dir, m, f'fold{f}')) for m, f in @members]
+networks: $[scripts.load_weights(scripts.build_network(@models_file, m), p).to(@device) for (m, f), p in zip(@members, @ckpt_paths)]
+pred_keys: $[f'pred_{i}' for i in range(len(@members))]
+
+test_datalist: "$[{'image': p} for p in sorted(glob.glob(os.path.join(@input_dir, @input_pattern), recursive=True))]"
+
+test_preprocessing:
+  _target_: Compose
+  transforms:
+    - _target_: LoadImaged
+      keys: image
+      image_only: true
+      ensure_channel_first: true
+    - _target_: CropForegroundd
+      keys: image
+      source_key: image
+      margin: 10
+    - _target_: Orientationd
+      keys: image
+      axcodes: RAS
+    - _target_: NormalizeIntensityd
+      keys: image
+      nonzero: true
+      channel_wise: true
+    - _target_: Spacingd
+      keys: image
+      pixdim: "@pix_size"
+      mode: bilinear
+      align_corners: true
+    - _target_: EnsureTyped
+      keys: image
+      dtype: $torch.float32
+      track_meta: true
+    - _target_: SpatialPadd
+      keys: image
+      spatial_size: "@roi_size"
+      mode: constant
+
+test_dataset:
+  _target_: Dataset
+  data: "@test_datalist"
+  transform: "@test_preprocessing"
+
+test_dataloader:
+  _target_: DataLoader
+  dataset: "@test_dataset"
+  batch_size: 1
+  shuffle: false
+  num_workers: "@num_workers"
+
+postprocessing:
+  _target_: Compose
+  transforms:
+    - _target_: Activationsd
+      keys: "@pred_keys"
+      sigmoid: true
+    - _target_: MeanEnsembled
+      keys: "@pred_keys"
+      output_key: pred
+    - _target_: Invertd
+      keys: pred
+      transform: "@test_preprocessing"
+      orig_keys: image
+      nearest_interp: false
+      to_tensor: true
+    - _target_: AsDiscreted
+      keys: pred
+      threshold: 0.5
+    - _target_: SaveImaged
+      keys: pred
+      output_dir: "@pred_dir"
+      output_postfix: lesion
+      output_dtype: $torch.uint8
+      resample: false
+      separate_folder: false
+
+evaluator:
+  _target_: EnsembleEvaluator
+  device: "@device"
+  val_data_loader: "@test_dataloader"
+  networks: "@networks"
+  pred_keys: "@pred_keys"
+  inferer: "@val_inferer"
+  postprocessing: "@postprocessing"
+  val_handlers:
+    - _target_: StatsHandler
+      iteration_log: false
+  amp: "@amp"
+
+initialize:
+  - $print(f'Segmenting {len(@test_datalist)} image(s) with {len(@members)} network(s) -> {@pred_dir}')
+  - $setattr(torch.backends.cudnn, 'benchmark', True)
+
+run:
+  - $@evaluator.run()

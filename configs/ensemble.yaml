@@ -1,0 +1,61 @@
+# Evaluate an ensemble of trained models on a held-out fold (Table 1, last row:
+# SegResNet + Deconver). Sigmoid probabilities are averaged voxelwise before
+# thresholding at 0.5.
+#
+#   python -m monai.bundle run --config_file "['configs/train.yaml','configs/ensemble.yaml']" \
+#       --fold 0 --data_dir /path/to/ISLES26
+#
+# Each member's checkpoint is taken from logs/<member>/fold<fold>/. Metrics are
+# written to logs/ensemble/<members>/fold<fold>/evaluation/.
+
+members: [segresnet, deconver_m1224_c64_k3]
+ckpt_paths: $[scripts.find_checkpoint(os.path.join(@logs_dir, m, f'fold{@fold}')) for m in @members]
+networks: $[scripts.load_weights(scripts.build_network(@models_file, m), p).to(@device) for m, p in zip(@members, @ckpt_paths)]
+pred_keys: $[f'pred_{i}' for i in range(len(@members))]
+
+output_dir: $os.path.join(@logs_dir, 'ensemble', '+'.join(@members), f'fold{@fold}')
+eval_dir: $os.path.join(@output_dir, 'evaluation')
+
+postprocessing:
+  _target_: Compose
+  transforms:
+    - _target_: Activationsd
+      keys: "@pred_keys"
+      sigmoid: true
+    - _target_: MeanEnsembled
+      keys: "@pred_keys"
+      output_key: pred
+    - _target_: AsDiscreted
+      keys: pred
+      threshold: 0.5
+
+val_handlers:
+  - _target_: StatsHandler
+    iteration_log: false
+  - _target_: MetricsSaver
+    save_dir: "@eval_dir"
+    metrics: "*"
+    metric_details: "*"
+    batch_transform: "$lambda batch: [x['image'].meta for x in batch]"
+    summary_ops: "*"
+
+evaluator:
+  _target_: EnsembleEvaluator
+  device: "@device"
+  val_data_loader: "@val_dataloader"
+  networks: "@networks"
+  pred_keys: "@pred_keys"
+  inferer: "@val_inferer"
+  postprocessing: "@postprocessing"
+  key_val_metric: "@val_key_metric"
+  additional_metrics: "@additional_metrics"
+  val_handlers: "@val_handlers"
+  amp: "@amp"
+
+initialize:
+  - $print('Checkpoints:', @ckpt_paths)
+  - $monai.utils.set_determinism(seed=123)
+  - $setattr(torch.backends.cudnn, 'benchmark', True)
+
+run:
+  - $@evaluator.run()

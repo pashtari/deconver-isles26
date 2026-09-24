@@ -1,0 +1,30 @@
+# Evaluate one trained model on its held-out fold (per-case Dice and HD95).
+#
+#   python -m monai.bundle run --config_file "['configs/train.yaml','configs/evaluate.yaml']" \
+#       --model deconver_m1224_c64_k3 --fold 0 --data_dir /path/to/ISLES26
+#
+# The checkpoint is taken from logs/<model>/fold<fold>/ (or pass --ckpt_path).
+# Metrics are computed as during training, in the preprocessed 1 mm space, and
+# written to logs/<model>/fold<fold>/evaluation/.
+
+ckpt_path: $scripts.find_checkpoint(@output_dir)
+eval_dir: $os.path.join(@output_dir, 'evaluation')
+network: $scripts.load_weights(scripts.build_network(@models_file, @model, @network_overrides), @ckpt_path).to(@device)
+
+val_handlers:
+  - _target_: StatsHandler
+    iteration_log: false
+  - _target_: MetricsSaver
+    save_dir: "@eval_dir"
+    metrics: "*"
+    metric_details: "*"
+    batch_transform: "$lambda batch: [x['image'].meta for x in batch]"
+    summary_ops: "*"
+
+initialize:
+  - $print('Checkpoint:', @ckpt_path)
+  - $monai.utils.set_determinism(seed=123)
+  - $setattr(torch.backends.cudnn, 'benchmark', True)
+
+run:
+  - $@evaluator.run()

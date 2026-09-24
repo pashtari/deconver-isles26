@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deconver for Stroke Lesion Segmentation</title>
+<style>
+@page { size: 841mm 1189mm; margin: 0; }
+:root {
+  --navy: #0B1F3A; --slate: #3D4A5C; --muted: #6B7686;
+  --teal: #0E9F8E; --teal-dark: #0A7D70; --teal-soft: #E4F5F2;
+  --blue: #2F6DF6; --gold: #C98F00; --gold-soft: #FFF4D6;
+  --panel: #F6F8FB; --line: #DCE2EA;
+}
+html, body { margin: 0; padding: 0; }
+body { width: 841mm; height: 1189mm; overflow: hidden; background: #fff; color: var(--navy);
+       font-family: 'Inter', 'DejaVu Sans', sans-serif; font-size: 21.5pt; line-height: 1.3;
+       -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page { box-sizing: border-box; width: 841mm; height: 1189mm; padding: 13mm 20mm 11mm; display: flex; flex-direction: column; gap: 8mm; }
+
+/* ---------- header ---------- */
+header { display: flex; align-items: center; justify-content: space-between; gap: 14mm; padding-bottom: 5mm; border-bottom: 1.2mm solid var(--navy); }
+.title-block { flex: 1 1 auto; }
+h1 { font-family: 'Inter Display', 'Inter', sans-serif; font-size: 74pt; font-weight: 800; letter-spacing: -0.02em; line-height: 1.04; margin: 0 0 4mm; }
+h1 span { color: var(--teal); }
+.tagline { font-size: 26.5pt; font-weight: 500; color: var(--slate); margin: 0 0 4mm; line-height: 1.25; max-width: 600mm; }
+.authors { font-size: 26pt; font-weight: 600; margin: 0 0 2mm; }
+.authors sup { font-size: 60%; font-weight: 500; color: var(--muted); }
+.affil { font-size: 19.5pt; color: var(--muted); margin: 0; }
+.logos { display: flex; flex-direction: row; align-items: center; gap: 12mm; flex: 0 0 auto; padding-right: 2mm; }
+.logos img { display: block; }
+.logo-row { display: flex; align-items: center; gap: 12mm; }
+
+/* ---------- stats strip ---------- */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10mm; }
+.stat { background: var(--panel); border-radius: 5mm; padding: 5mm 9mm 4.5mm; display: flex; align-items: center; gap: 9mm; border-left: 3.5mm solid var(--teal); }
+.stat.gold { border-left-color: var(--gold); }
+.stat .num { font-family: 'Inter Display', 'Inter', sans-serif; font-size: 56pt; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--teal-dark); white-space: nowrap; }
+.stat.gold .num { color: var(--gold); }
+.stat .num small { font-size: 55%; font-weight: 700; }
+.stat .lab { font-size: 21pt; line-height: 1.28; color: var(--slate); }
+.stat .lab b { color: var(--navy); }
+
+/* ---------- main grid ---------- */
+.main { display: grid; grid-template-columns: 380mm 1fr; grid-auto-rows: min-content; gap: 8mm 10mm; flex: 1 1 auto; align-content: start; }
+.col > section.card:last-child { flex: 1 1 auto; }
+.col { height: 100%; }
+.col { display: flex; flex-direction: column; gap: 8mm; }
+section.card { background: #fff; border: 0.5mm solid var(--line); border-radius: 5mm; padding: 6mm 8mm 6.5mm; }
+section.card.tint { background: var(--panel); }
+.sec-head { display: flex; align-items: center; gap: 5mm; margin: 0 0 5mm; }
+.sec-head .n { flex: 0 0 auto; width: 15mm; height: 15mm; border-radius: 3mm; background: var(--navy); color: #fff; font-weight: 800; font-size: 21pt; display: flex; align-items: center; justify-content: center; }
+.sec-head h2 { margin: 0; font-size: 31pt; font-weight: 800; letter-spacing: -0.01em; line-height: 1.1; }
+.sec-head h2 small { font-weight: 500; color: var(--muted); font-size: 22pt; margin-left: 4mm; }
+.lead { font-size: 24pt; font-weight: 600; line-height: 1.28; margin: 0 0 3.5mm; color: var(--navy); }
+p { margin: 0 0 3.5mm; }
+ul { margin: 0; padding-left: 8mm; }
+li { margin: 0 0 2.2mm; }
+li::marker { color: var(--teal); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; align-items: start; }
+.cap { font-size: 18.5pt; color: var(--muted); line-height: 1.3; margin-top: 3mm; }
+.callout { background: var(--teal-soft); border-left: 3mm solid var(--teal); border-radius: 0 3mm 3mm 0; padding: 4mm 6mm; margin: 4mm 0 0; font-size: 22pt; }
+.callout.gold { background: var(--gold-soft); border-left-color: var(--gold); }
+.figure { text-align: center; }
+.figure img { max-width: 100%; display: block; margin: 0 auto; }
+
+/* key idea layout */
+.backbone { display: grid; grid-template-columns: 1fr 118mm; gap: 7mm; align-items: center; margin-top: 1mm; }
+.backbone img { width: 100%; display: block; }
+.eqlabel { font-size: 18pt; font-weight: 700; color: var(--teal-dark); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 2mm; }
+.eq { display: block; margin: 1mm auto; }
+.idea-row { display: grid; grid-template-columns: 112mm 1fr; gap: 7mm; margin-top: 4mm; align-items: stretch; }
+.blockeq { text-align: center; margin-top: 2mm; }
+.mixer { background: var(--panel); border-radius: 4mm; padding: 4mm 4mm 3mm; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.mixer img.diag { width: 58mm; }
+.ndc { background: var(--panel); border-radius: 4mm; padding: 5mm 6mm; }
+.ndc p { font-size: 20.5pt; line-height: 1.3; margin: 0 0 3mm; }
+.eqs { display: flex; align-items: center; justify-content: space-around; gap: 6mm; flex-wrap: wrap; margin: 2mm 0 3mm; }
+.props-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin-top: 4mm; }
+.props { list-style: none; padding: 0; margin: 0; display: contents; }
+.props li { padding: 3mm 4mm 3mm 11mm; position: relative; font-size: 18.5pt; line-height: 1.28; background: var(--panel); border-radius: 3mm; }
+.props li::before { content: "✓"; position: absolute; left: 3.5mm; top: 3mm; color: var(--teal); font-weight: 800; }
+/* pipeline facts */
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 3mm; }
+.chip { background: var(--panel); border-radius: 3mm; padding: 2.2mm 4mm; font-size: 17.5pt; line-height: 1.25; }
+.chip b { display: block; font-size: 17pt; color: var(--teal-dark); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 1mm; }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 19.5pt; }
+th { text-align: left; font-weight: 700; color: var(--muted); font-size: 17.5pt; text-transform: uppercase; letter-spacing: 0.04em; padding: 2mm 3mm; border-bottom: 0.5mm solid var(--line); }
+td { padding: 2mm 3mm; border-bottom: 0.3mm solid var(--line); white-space: nowrap; }
+td.r, th.r { text-align: right; }
+tr.ours td { background: var(--teal-soft); font-weight: 700; }
+tr.ens td { background: var(--gold-soft); font-weight: 700; }
+tr.best td.dice { color: var(--teal-dark); }
+.mono { font-variant-numeric: tabular-nums; }
+
+/* takeaways + code band */
+.band { display: grid; grid-template-columns: 1fr 320mm; gap: 10mm; }
+.take li { font-size: 21pt; margin-bottom: 1.8mm; }
+.take li b { color: var(--teal-dark); }
+.code { background: var(--navy); color: #fff; border-radius: 5mm; padding: 6mm 8mm; display: grid; grid-template-columns: 92mm 1fr; gap: 7mm; align-items: center; }
+.code img.qr { width: 92mm; height: 92mm; background: #fff; padding: 9mm; box-sizing: border-box; border-radius: 3mm; }
+.code h2 { margin: 0 0 3mm; font-size: 30pt; font-weight: 800; color: #fff; }
+.code p { margin: 0 0 2.5mm; font-size: 20pt; color: #D7DEE9; line-height: 1.3; }
+.code .url { font-size: 24pt; font-weight: 700; color: #7FE3D6; }
+.code code { font-family: 'DejaVu Sans Mono', monospace; font-size: 17.5pt; color: #fff; background: rgba(255,255,255,0.12); padding: 1mm 2.5mm; border-radius: 2mm; }
+.legend { display: flex; gap: 7mm; flex-wrap: wrap; font-size: 18.5pt; color: var(--slate); margin-top: 3mm; }
+.legend span::before { content: ""; display: inline-block; width: 6mm; height: 6mm; border-radius: 1.5mm; margin-right: 2.5mm; vertical-align: -0.8mm; background: var(--c); }
+.refs { font-size: 17pt; color: var(--muted); line-height: 1.28; margin-top: 2mm; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="title-block">
+    <h1>Deconver for Stroke Lesion Segmentation</h1>
+    <p class="tagline">Nonnegative deconvolution instead of self-attention: best Dice of four architectures on ISLES&#8217;26 at a third of the parameters</p>
+    <p class="authors">Niels Vyncke<sup>1</sup>, Shahryar Noei<sup>2</sup>, Giuseppe Jurman<sup>2</sup>, Aleksandra Pi&#382;urica<sup>1</sup>, Pooya Ashtari<sup>1</sup></p>
+    <p class="affil"><sup>1</sup> TELIN, Ghent University, Belgium &nbsp;&middot;&nbsp; <sup>2</sup> Data Science for Health Unit, Fondazione Bruno Kessler, Trento, Italy &nbsp;&middot;&nbsp; pooya.ashtari@ugent.be</p>
+  </div>
+  <div class="logos">
+    <img src="assets/ugent_logo.png" style="height:46mm">
+    <img src="assets/switch_plus_logo_navy.svg" style="height:30mm">
+    <img src="assets/miccai2026_logo.png" style="height:36mm">
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="num">63.6<small>%</small></div><div class="lab"><b>Best mean Dice</b> of nnU-Net, SegResNet, SwinUNETR-V2 and Deconver, five-fold cross-validation on ISLES&#8217;26</div></div>
+  <div class="stat"><div class="num">3&times;</div><div class="lab"><b>Fewer parameters</b> than either large baseline: 25.5M against 75.2M (SegResNet) and 72.8M (SwinUNETR-V2)</div></div>
+  <div class="stat gold"><div class="num">64.4<small>%</small></div><div class="lab"><b>Dice of the SegResNet + Deconver ensemble</b>, our challenge submission: the two blocks err differently</div></div>
+</div>
+
+<div class="main">
+<!-- ================= LEFT COLUMN ================= -->
+<div class="col">
+
+<section class="card">
+  <div class="sec-head"><div class="n">01</div><h2>The problem <small>ISLES&#8217;26</small></h2></div>
+  <p class="lead">Segment ischemic stroke lesions from T1-weighted MRI alone, across lesion stages and imaging centers.</p>
+  <div class="two">
+    <ul>
+      <li><b>No diffusion contrast.</b> The DWI/ADC signal that acute delineation usually relies on is absent.</li>
+      <li><b>Acute to chronic lesions</b>, whose T1 appearance changes markedly with time since onset.</li>
+      <li><b>More than 60 centers</b> at native resolution: spacing, field of view and orientation all vary.</li>
+      <li>Generalization is the operative difficulty, not accuracy under harmonized acquisition.</li>
+    </ul>
+    <div class="figure">
+      <img src="figs/problem_example.png" style="width:47%; border-radius:3mm">
+      <div class="cap">Native-space T1w scan with the expert lesion mask (yellow)</div>
+    </div>
+  </div>
+  <div class="callout">Which network block copes best? Published comparisons confound the block with pipeline engineering and model size. We fix everything except the block.</div>
+</section>
+
+<section class="card">
+  <div class="sec-head"><div class="n">02</div><h2>Key idea <small>Deconver</small></h2></div>
+  <p class="lead">Keep the U-shaped backbone and the transformer block layout, but replace self-attention with a <span style="color:var(--teal-dark)">Deconv Mixer</span> built around a nonnegative deconvolution (NDC) layer.</p>
+  <div class="blockeq">
+    <div class="eqlabel">Deconver block</div>
+    <img class="eq" src="figs/eq_block.svg" style="width:262mm">
+    <div class="cap" style="margin-top:1mm">Instance norm (IN) instead of layer norm suits small 3D batches; the MLP is two pointwise convolutions with a GELU.</div>
+  </div>
+  <div class="idea-row">
+    <div class="mixer">
+      <div class="eqlabel">Deconv Mixer</div>
+      <img class="diag" src="figs/mixer.svg">
+      <div class="cap" style="margin-top:2mm">Project, enforce nonnegativity, deconvolve, project back</div>
+    </div>
+    <div class="ndc">
+      <div class="eqlabel">NDC layer: one Richardson&#8211;Lucy step</div>
+      <p>The nonnegative feature map <i>X</i> is treated as a <b>blurred observation</b> of a latent source <i>S</i>, seen through a learnable nonnegative filter <i>V</i>:</p>
+      <div class="eqs"><img class="eq" src="figs/eq_ndc_problem.svg" style="width:118mm"></div>
+      <p>From a learned initialization <i>S</i><sup>(0)</sup>, a single multiplicative update recovers a sharper source (<i>V</i><sup>&minus;</sup>: adjoint filter, <i>&epsilon;</i> = 10<sup>&minus;8</sup>):</p>
+      <div class="eqs"><img class="eq" src="figs/eq_ndc.svg" style="width:136mm"></div>
+    </div>
+  </div>
+  <div class="props-row"><ul class="props">
+    <li><b>Provably safe:</b> never increases the reconstruction error, keeps nonnegativity, is differentiable: <i>V</i> is trained end to end.</li>
+    <li><b>Cheap context:</b> depthwise groups, expansion ratio 4, one iteration: spatial dependencies without attention&#8217;s cost.</li>
+    <li><b>Restores high-frequency detail</b> while suppressing artifacts; descends from Factorizer (3rd in ISLES&#8217;22) and keeps its nonnegativity prior.</li>
+  </ul></div>
+</section>
+
+<section class="card">
+  <div class="sec-head"><div class="n">03</div><h2>Controlled comparison <small>one pipeline, four blocks</small></h2></div>
+  <p>All four networks share the encoder&#8211;decoder backbone of Fig.&nbsp;1a: level <i>&#8467;</i> carries <i>C</i><sub>&#8467;</sub> channels and holds <i>M</i><sub>&#8467;</sub> encoder and <i>N</i><sub>&#8467;</sub> decoder blocks; each stage halves the resolution and doubles the channels. <b>Only the block repeated at each level differs</b> (Fig.&nbsp;1b; data flows upwards, <i>S</i>&nbsp;=&nbsp;2 in the first block of a stage).</p>
+  <div class="figure"><img src="figs/fig1a.svg" style="width:67%"></div>
+  <div class="figure" style="margin-top:3mm"><img src="figs/blocks4.svg" style="width:72%"></div>
+  <div class="chips">
+    <div class="chip"><b>Preprocessing</b>Foreground crop, RAS, 1&times;1&times;1 mm, z-score of non-zero voxels</div>
+    <div class="chip"><b>Training</b>128&sup3; patches, batch 2, AdamW 10<sup>&minus;4</sup>, warm-up cosine, 300 epochs, Dice&nbsp;+&nbsp;CE</div>
+    <div class="chip"><b>Augmentation</b>Affine, Gaussian noise and blur, intensity scale and shift (p = 0.2), flips (p = 0.5)</div>
+    <div class="chip"><b>Validation</b>Five folds stratified by lesion volume, identical for all models (1,451 cases)</div>
+    <div class="chip"><b>Inference</b>Sliding window, 128&sup3;, mean Dice over the validation cases of all folds</div>
+    <div class="chip"><b>Ensemble</b>Voxelwise mean of the SegResNet and Deconver probability maps (10 networks)</div>
+  </div>
+</section>
+
+</div>
+<!-- ================= RIGHT COLUMN ================= -->
+<div class="col">
+
+<section class="card">
+  <div class="sec-head"><div class="n">04</div><h2>Results <small>accuracy is not aligned with capacity</small></h2></div>
+  <div class="figure"><img src="figs/dice_vs_params.svg" style="width:100%"></div>
+  <div class="cap" style="margin-top:0">Teal: the seven Deconver configurations of the paper&#8217;s ablation (large dot: the model of Table 1). Gray: baselines. Star: SegResNet + Deconver ensemble.</div>
+  <table style="margin-top:4mm">
+    <tr><th>Model</th><th>[<i>M</i><sub>&#8467;</sub>]</th><th class="r">C<sub>0</sub></th><th class="r">Params (M)</th><th class="r">Dice (%)</th></tr>
+    <tr><td>nnU-Net</td><td class="mono">[1,1,1,1,1]</td><td class="r">32</td><td class="r">22.57</td><td class="r dice">62.54</td></tr>
+    <tr><td>SegResNet</td><td class="mono">[1,2,2,4]</td><td class="r">64</td><td class="r">75.17</td><td class="r dice">63.00</td></tr>
+    <tr><td>SwinUNETR-V2</td><td class="mono">[2,2,2,2]</td><td class="r">48</td><td class="r">72.76</td><td class="r dice">62.41</td></tr>
+    <tr class="ours best"><td>Deconver</td><td class="mono">[1,2,2,4]</td><td class="r">64</td><td class="r">25.46</td><td class="r dice">63.59</td></tr>
+    <tr class="ens"><td colspan="3">Ensemble (SegResNet + Deconver)</td><td class="r">100.63</td><td class="r dice">64.44</td></tr>
+  </table>
+  <div class="callout">+0.59 Dice over the strongest baseline at 2.95&times; fewer parameters; +1.18 over SwinUNETR-V2 at 2.9&times; fewer. nnU-Net, the only baseline of comparable size, trails by 1.05.</div>
+  <div class="callout gold"><b>Ablation in brief.</b> Width is the effective knob (C<sub>0</sub> 32&rarr;64: +0.83 Dice); depth and a 5&sup3; NDC kernel do not help. Even the 6.46M variant beats nnU-Net and SwinUNETR-V2, and the 10.55M variant matches SegResNet at 7.1&times; fewer parameters.</div>
+</section>
+
+<section class="card">
+  <div class="sec-head"><div class="n">05</div><h2>Qualitative results <small>unseen validation cases</small></h2></div>
+  <div class="figure"><img src="figs/qualitative.png" style="width:100%; border-radius:3mm"></div>
+  <div class="legend"><span style="--c:#14B8A6">true positive</span><span style="--c:#F43F5E">false positive</span><span style="--c:#3B82F6">missed lesion</span><span style="--c:#FFD166">ground-truth contour</span></div>
+  <div class="cap">Four fold-0 validation cases (2 to 52 mL lesions, never seen in training) segmented by the fold-0 models of each architecture and by their SegResNet + Deconver ensemble. Each label gives the Dice of the whole case and of the displayed axial slice; in every row, Deconver and the ensemble score above all three baselines on both.</div>
+</section>
+
+</div>
+</div>
+
+<!-- ================= BOTTOM BAND ================= -->
+<div class="band">
+  <section class="card tint take">
+    <div class="sec-head"><div class="n">06</div><h2>Take-home messages</h2></div>
+    <ul>
+      <li><b>Nonnegative deconvolution is a strong block for stroke lesions:</b> under one fixed pipeline, Deconver gives the best mean Dice of the four architectures (63.59) at about a third of the parameters of the two large baselines.</li>
+      <li><b>Scale the width, not the depth or the kernel:</b> all seven Deconver variants span only 0.83 Dice across an eightfold parameter range.</li>
+      <li><b>Combining blocks beats enlarging them:</b> averaging SegResNet and Deconver probability maps adds +0.85 Dice (64.44), more than any scaling step; this ten-network ensemble is our challenge submission. <b>Next:</b> lesion-wise metrics, per-fold tests, center-held-out splits.</li>
+    </ul>
+  </section>
+  <div class="code">
+    <img class="qr" src="assets/qr_deconver.svg">
+    <div>
+      <h2>Try Deconver</h2>
+      <p class="url">github.com/pashtari/deconver</p>
+      <p><code>pip install git+https://github.com/pashtari/deconver.git</code></p>
+      <p>ISLES&#8217;26 configs, trained models and results: <b style="color:#fff">github.com/pashtari/deconver-isles26</b></p>
+      <p class="refs" style="color:#AEB8C8">Vyncke, Noei, Jurman, Pi&#382;urica, Ashtari. <i>Deconver for Stroke Lesion Segmentation.</i> SWITCH+ Workshop, MICCAI 2026.<br>Ashtari et al. <i>Deconver: A Deconvolutional Network for Medical Image Segmentation.</i> IEEE JBHI, 2025.</p>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
