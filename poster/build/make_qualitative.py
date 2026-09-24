@@ -158,8 +158,8 @@ def draw(case_ids):
                 for mask, colr in [(p & g, TEAL), (p & ~g, RED), (~p & g, BLUE)]:
                     rgba = np.zeros(mask.shape + (4,)); rgba[mask] = matplotlib.colors.to_rgba(colr, 0.6); ax.imshow(rgba, interpolation="nearest")
                 ax.contour(g, levels=[0.5], colors=[GT], linewidths=0.9)
-                ax.text(0.04, 0.04, f"Dice {dice(pred, gt):.1f}  |  slice {d2[col]:.1f}", transform=ax.transAxes, color="white", fontsize=11,
-                        fontweight="bold", ha="left", va="bottom", bbox=dict(boxstyle="round,pad=0.25", fc=NAVY, ec="none", alpha=0.85))
+                ax.text(0.04, 0.04, f"Dice {dice(pred, gt):.1f}", transform=ax.transAxes, color="white", fontsize=13, fontweight="bold",
+                        ha="left", va="bottom", bbox=dict(boxstyle="round,pad=0.25", fc=NAVY, ec="none", alpha=0.85))
             if r == 0:
                 ax.set_title(title, fontsize=14, color=NAVY, fontweight="bold" if "ours" in title else "normal", pad=6)
     fig.subplots_adjust(wspace=0.03, hspace=0.04, left=0.004, right=0.996, top=0.95, bottom=0.004)
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     a = ap.parse_args(); os.makedirs(CACHE, exist_ok=True)
     if a.stage == "select":
         select(os.path.abspath(a.data_dir), a.n); sys.exit()
-    default = ["sub-r018s003", "sub-r009s009", "sub-r009s003", "sub-r004s019"] if a.stage == "draw" else [c["id"] for c in json.load(open(f"{CACHE}/candidates.json"))]
+    default = ["sub-r009s115", "sub-r009s009", "sub-r009s003", "sub-r004s019"] if a.stage == "draw" else [c["id"] for c in json.load(open(f"{CACHE}/candidates.json"))]
     ids = a.cases.split(",") if a.cases else default
     if a.stage == "predict": predict(a.models.split(","), ids, os.path.abspath(a.data_dir))
     elif a.stage == "table": table(ids)
