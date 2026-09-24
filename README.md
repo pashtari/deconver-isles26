@@ -73,7 +73,7 @@ trained on all five folds:
 
 ```bash
 DATA_DIR=/path/to/ISLES26 bash hpc/submit_grid.sh    # 10 models x 5 folds on a PBS cluster
-python scripts/benchmark.py                           # parameters and GPU throughput -> results/benchmark.csv
+python scripts/benchmark.py                           # adds parameters and GPU throughput to results/*.csv
 python scripts/collect_results.py                     # -> results/*.csv
 python -m monai.bundle run --config_file "['configs/train.yaml','configs/ensemble.yaml']" \
     --fold 0 --data_dir /path/to/ISLES26              # SegResNet + Deconver ensemble, one fold

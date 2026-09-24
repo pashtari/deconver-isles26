@@ -67,13 +67,16 @@ def per_fold(results, order):
     ]
 
 
-def benchmark(results_dir):
-    """{model: {params_M, throughput_img_s}} from results/benchmark.csv, or {}."""
-    path = os.path.join(results_dir, "benchmark.csv")
+BENCH_COLUMNS = ["params_M", "throughput_img_s", "input", "batch", "precision", "gpu", "torch"]
+
+
+def benchmark(path):
+    """Benchmark columns already present in the CSV at ``path``: (columns, {model: values})."""
     if not os.path.exists(path):
-        return {}
+        return [], {}
     with open(path, newline="") as f:
-        return {r["model"]: {"params_M": r["params_M"], "throughput_img_s": r["throughput_img_s"]} for r in csv.DictReader(f)}
+        reader = csv.DictReader(f); cols = [c for c in BENCH_COLUMNS if c in reader.fieldnames]
+        return cols, {r["model"]: {c: r[c] for c in cols} for r in reader}
 
 
 def write_csv(path, rows, fields):
@@ -93,21 +96,23 @@ def main():
 
     results = collect(args.logs_dir)
     averages = average(results)
-    bench = benchmark(args.results_dir)
-    extra = ["params_M", "throughput_img_s"] if bench else []
+    avg_path, folds_path = os.path.join(args.results_dir, "results_average.csv"), os.path.join(args.results_dir, "results_folds.csv")
+    extra, bench = benchmark(avg_path)
     for row in averages:
         row.update(bench.get(row["model"], {k: "" for k in extra}))
     folds = per_fold(results, [r["model"] for r in averages])
+    fold_extra = [c for c in ("params_M", "throughput_img_s") if c in extra]
     for row in folds:
-        row.update(bench.get(row["model"], {k: "" for k in extra}))
+        row.update({k: bench.get(row["model"], {}).get(k, "") for k in fold_extra})
     os.makedirs(args.results_dir, exist_ok=True)
-    write_csv(os.path.join(args.results_dir, "results_average.csv"), averages, ["model", "folds"] + extra + ["dice", "hd95"])
-    write_csv(os.path.join(args.results_dir, "results_folds.csv"), folds, ["model", "fold"] + extra + ["dice", "hd95"])
+    write_csv(avg_path, averages, ["model", "folds", "dice", "hd95"] + extra)
+    write_csv(folds_path, folds, ["model", "fold", "dice", "hd95"] + fold_extra)
 
-    print("| model | folds |" + "".join(f" {k} |" for k in extra) + " dice | hd95 |")
-    print("| --- | --- |" + " --- |" * len(extra) + " --- | --- |")
+    shown = [c for c in ("params_M", "throughput_img_s") if c in extra]
+    print("| model | folds | dice | hd95 |" + "".join(f" {k} |" for k in shown))
+    print("| --- | --- | --- | --- |" + " --- |" * len(shown))
     for r in averages:
-        print(f"| {r['model']} | {r['folds']} |" + "".join(f" {r[k]} |" for k in extra) + f" {r['dice']:.2f} | {'' if r['hd95'] is None else f'{r['hd95']:.2f}'} |")
+        print(f"| {r['model']} | {r['folds']} | {r['dice']:.2f} | {'' if r['hd95'] is None else f'{r['hd95']:.2f}'} |" + "".join(f" {r[k]} |" for k in shown))
     print(f"\nWrote results_average.csv and results_folds.csv to {args.results_dir}")
 
 

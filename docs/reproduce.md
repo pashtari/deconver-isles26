@@ -37,15 +37,16 @@ reads the last validation metrics of every run from `logs/*/fold*/tb`, averages 
 over the folds and writes [`results/results_average.csv`](../results/results_average.csv)
 (one row per model: number of folds, mean Dice (%) and mean HD95 (mm), sorted by Dice)
 and [`results/results_folds.csv`](../results/results_folds.csv) (one row per model
-and fold). Both also list the parameter count and the GPU inference throughput of each
-model, taken from [`results/benchmark.csv`](../results/benchmark.csv), which
+and fold). Both also carry the parameter count and the GPU inference throughput of each
+model, written by
 
 ```bash
 python scripts/benchmark.py
 ```
 
-measures as 128^3 input patches segmented per second (forward pass only, batch size 1,
-fp32) on the first visible GPU; the file records the GPU and PyTorch version used.
+which measures 128^3 input patches segmented per second (forward pass only, batch size 1,
+fp32) on the first visible GPU; `results_average.csv` also records the input size, batch,
+precision, GPU and PyTorch version of the measurement.
 
 ## 3. Evaluate a trained model
 
